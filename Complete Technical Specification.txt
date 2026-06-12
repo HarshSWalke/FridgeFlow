@@ -1,0 +1,251 @@
+FridgeFlow – Complete Technical Specification (Page by Page)
+
+Global Architecture FirstBefore pages, understand these building blocks:Data Models (what gets stored)
+
+User → profile + vendor contacts + preferencesItem → name, category, quantity, unit, threshold, dateAdded, expiryDate, pricePerUnit, addedByOrder → vendorId, items[], status, dateSent, messageTextTransaction → itemId, quantity, pricePerUnit, date, type (added/consumed/expired)
+
+Core Logic Rules
+
+Every item has a threshold quantity — when current quantity ≤ threshold, item auto-flags as "Low"Every item tracks quantity as a number — not just "present/absent"Expired = today's date > expiryDateReorder list = union of (low stock items + manually added items + finished items)
+
+Page 1 — Landing / Marketing PagePurpose: Convert visitors to signups. Public page, no login needed.Sections:Header
+
+Logo (FridgeFlow) + Nav links: Features | How It Works | Sign Up | Log InSticky on scroll
+
+Hero Section
+
+Headline: "Never waste food. Never run out. Never forget."Subheadline: one line about what the app doesCTA button: Get Started FreeBackground: illustration of a clean virtual fridge
+
+How It Works (3 steps)
+
+Step 1: Add your fridge itemsStep 2: Get alerts when things run low or expireStep 3: Reorder via WhatsApp in one tapEach step has a small icon + 2 line description
+
+Features Strip
+
+6 cards: Virtual Fridge | Expiry Alerts | WhatsApp Reorder | Spending Tracker | Multi-Vendor | Family Sharing
+
+Footer
+
+Links: Privacy Policy | Terms | ContactCopyright
+
+Logic: No logic here. Pure static content. On CTA click → redirect to /signup
+
+Page 2 — Signup PagePurpose: Collect user info and set up their account in one smooth flow.Layout: Single page, split into steps (Step 1 of 3 style) — not separate pages. Keeps it light.
+
+Step 1 — Basic InfoFields:
+
+Full Name (text input)Mobile Number (number input + country code dropdown, default +91)Email (text input)Password (text input, show/hide toggle)Family Size (dropdown: 1 | 2 | 3 | 4 | 5+) — used later to suggest default thresholdsLanguage Preference (dropdown: English | Hindi)
+
+Validation logic:
+
+Mobile: exactly 10 digits after country codeEmail: standard format checkPassword: min 8 characters, 1 numberAll fields required except Language (defaults to English)
+
+CTA: Next →
+
+Step 2 — Add Your VendorsExplanation text at top: "We'll use these numbers to send WhatsApp orders directly. You can edit these later."Pre-built vendor slots:
+
+🥛 Milkman — Name field + WhatsApp number field🥦 Vegetable Vendor — Name + Number🍎 Fruit Vendor — Name + Number🛒 General Store — Name + Number
+
+Add Custom Vendor button
+
+Opens an inline row: Vendor Name + Emoji/icon picker + WhatsApp NumberMaximum 10 vendors total
+
+Each row has a Delete (×) icon on the right.All vendor fields are optional at signup — user can skip and add later.CTA: Next → | ← Back
+
+Step 3 — Set Your Default ThresholdsExplanation: "Tell us when to alert you. We've set smart defaults based on your family size — adjust as needed."Pre-loaded item list based on common Indian household items:
+
+Milk | Curd | Paneer | Onion | Tomato | Potato | Rice | Dal | Bread | Eggs | Sugar | Oil
+
+Each item shows:
+
+Item nameUnit selector (L / kg / g / pcs / packets)Threshold input (number box, pre-filled based on family size)Toggle: Include in my fridge / Skip
+
+Add custom item link at the bottom for anything not in the list.CTA: Finish Setup →On completion → account created → redirect to /dashboard
+
+Page 3 — Login PageSimple and clean.
+
+Email + Password fieldsShow/hide password toggleLog In buttonForgot Password link → sends reset email"Don't have an account? Sign Up" linkOptional: Google Sign-In button (one-tap for returning users)
+
+Logic: On success → redirect to /dashboard. On fail → inline error below the field that failed (not a page reload).
+
+Page 4 — Dashboard (Main Hub)This is the most important page. User lands here every time they open the app.Layout: Sidebar on left (navigation) + Main content area on right.
+
+Sidebar (persistent across all pages)
+
+FridgeFlow logo at topUser avatar + nameNav links:
+
+🏠 Dashboard🧊 My Fridge📋 Reorder📓 Notebook⚙️ Settings
+
+At bottom: Log Out
+
+Dashboard Main Content — 4 sectionsSection A — Quick Stats Bar (top)4 stat cards in a row:
+
+Total Items in Fridge: 42Items Expiring Soon (≤3 days): 3 (shown in yellow)Items Low on Stock: 5 (shown in orange)This Month's Spend: ₹3,240
+
+Logic: These numbers pull live from the database every time dashboard loads. No manual refresh needed.
+
+Section B — Alerts PanelCollapsible card titled "Needs Your Attention"Shows a list of flagged items:
+
+🔴 "Milk expired yesterday" → [Mark Finished] [Remove]🟡 "Tomatoes expiring tomorrow" → [Use Now] [Extend Date]🟠 "Rice below threshold (500g left)" → [Add to Reorder]
+
+Logic:
+
+Expired = expiryDate < todayExpiring soon = expiryDate within next 3 daysLow stock = currentQuantity ≤ thresholdEach alert has contextual action buttons — not generic onesIf no alerts → show a green card: "Everything looks good today!"
+
+Section C — Fridge Snapshot (mini view)A condensed preview of the fridge showing sections as horizontal tabs:Dairy | Vegetables | Fruits | Dry Goods | Beverages | SnacksEach tab shows top 5 items in that section with color dot (green/yellow/red) + quantity.View Full Fridge → button takes user to the Fridge page.
+
+Section D — Recent Activity FeedA vertical log of recent events (like a simple timeline):
+
+"You added 2L Milk — 2 hours ago""500g Paneer marked as Finished — yesterday""Reorder sent to Milkman — 2 days ago"
+
+Logic: Every write action (add, edit, finish, delete, order sent) creates a log entry with timestamp and user tag. Stored in a ActivityLog table. Dashboard shows last 10.
+
+Page 5 — My Fridge PageThis is the virtual fridge — the core of the product.
+
+Top Bar
+
+Page title: "My Fridge"
+
+Add Item button (primary, always visible top right)Search bar: search by item name across all sectionsFilter dropdown: All | 🔴 Expired | 🟡 Expiring Soon | 🟠 Low Stock | 🟢 Fresh
+
+Section TabsHorizontal scrollable tabs:All | Dairy | Vegetables | Fruits | Dry Goods | Beverages | Snacks | LeftoversClicking a tab filters the item grid below.
+
+Item GridItems displayed as cards in a responsive grid (3 columns desktop, 2 on tablet, 1 on mobile).Each Item Card shows:
+
+Item name (bold)Colored freshness dot (🟢🟡🔴) — top right corner of cardQuantity + unit (e.g., "1.5 L")Expiry date (e.g., "Expires Jun 5" or "No Expiry")Date added (small text, grey)Category tag (small pill badge)Two action buttons: Edit ✏️ | Mark Finished ✓Three-dot menu (…): Edit | Add to Reorder | Delete
+
+Logic behind quantity:
+
+Stored as a float (e.g., 1.5, 500, 12)Unit stored separately (L, kg, g, pcs, packets)When user edits quantity, they can type new value OR use +/– stepper buttonsQuantity can never go below 0 — if user sets 0, system prompts "Mark as Finished?"
+
+Freshness color logic:
+
+No expiry set → always 🟢expiryDate > today + 3 days → 🟢expiryDate within today to today + 3 days → 🟡expiryDate < today → 🔴
+
+Add Item Flow (triggered by + Add Item button)Opens a side drawer (slides in from right) — not a new page, not a popup modal.Fields in the drawer:
+
+Item Name — text input with autocomplete (suggests from user's history + common items list)Category — dropdown (Dairy / Vegetables / Fruits / Dry Goods / Beverages / Snacks / Leftovers / Other)Quantity — number inputUnit — dropdown (kg / g / L / mL / pcs / packets / bottles)Date Added — auto-fills today, user can changeExpiry Date — date picker. Toggle: "This item has no fixed expiry" (hides the date picker)Price per unit — number input (optional, used for spending tracker). Placeholder: "e.g. ₹52"Threshold quantity — number input. Helper text: "Alert me when below this amount". Pre-fills based on signup defaults if item was pre-configured.Assign Vendor — dropdown of saved vendors (optional — used to auto-assign reorders)
+
+Duplicate detection logic:
+
+On item name input, check if same item name already exists in same categoryIf yes → show inline warning: "Milk already exists in Dairy (1.5L). Want to update quantity instead?"Two options: Update Existing | Add as New (different brand/type)
+
+Edit Item:Same drawer opens pre-filled with existing values. All fields editable. Save overwrites. Cancel discards changes.
+
+Mark as Finished:
+
+One-click button on cardSets quantity to 0Creates activity log entryChecks if item has a threshold → if yes, auto-adds to Reorder section with a toast notification: "Paneer added to your Reorder list"
+
+Page 6 — Reorder PagePurpose: Build and send grocery orders to vendors via WhatsApp.
+
+Top Bar
+
+Page title: "Reorder"Two tabs: Pending Orders | Order History
+
+Pending Orders TabSection: Auto-Suggested ItemsItems that crossed threshold or were marked finished appear here automatically.Shown as a list with:
+
+Item name + category tagSuggested quantity (pre-filled from threshold or last order quantity)UnitVendor assigned (if pre-set, else dropdown to pick)Quantity stepper: – [  2  ] + with manual type optionRemove (×) button
+
+Section: Add Item Manually
+
+Inline input row at the bottom of the list: Item name | Qty | Unit | Vendor → Add buttonSame autocomplete as fridge page
+
+Group by Vendor (Automatic)Once items are in the list, they get visually grouped by vendor:🥛 Milkman (Ramesh – 9876543210)• Milk        2 L• Curd        500 g• Paneer      250 g
+
+🥦 Vegetable Vendor (Suresh – 9123456789)• Tomatoes    1 kg• Onion       2 kgEach vendor group has a Send Order → button.
+
+Send Order Flow:
+
+User clicks Send Order → for a vendor groupPreview screen slides in (important — prevents accidental sends)Shows the exact WhatsApp message that will be sent:
+
+"Hi Ramesh, please deliver tomorrow: 2L Milk, 500g Curd, 250g Paneer. Thank you! – Priya"
+
+User can edit the message text directly in this screenTwo buttons:
+
+Send via WhatsApp → opens WhatsApp with pre-filled message using wa.me/{number}?text={message} linkCopy Text → copies formatted text to clipboard, shows "Copied!" confirmation
+
+After sending → system asks: "Did the order go through?"
+
+Yes → order saved to history with timestamp, items removed from pendingNot yet → stays in pending, no history entry
+
+
+
+Order History TabList of all past orders, newest first.Each order shows:
+
+Vendor name + date sentItems list (collapsed by default, expandable)Reorder Same Items button → pulls the same items back into Pending with one tap
+
+Logic — Recurring Orders:
+
+User can flag any item as "Recurring" with a frequency (Daily / Every 2 days / Weekly)System auto-adds these items to Reorder section on schedulePush notification sent: "Your daily milk reorder is ready to send"
+
+Page 7 — Notebook (Spending Tracker)Purpose: Help users understand where their grocery money goes.
+
+Top Bar
+
+Page title: "Notebook"Month selector: ← May 2025 → (navigate months)Export button: ↓ Export PDF
+
+Section A — Monthly Summary Cards4 cards in a row:
+
+Total Spent: ₹4,200Items Purchased: 38Items Wasted (expired): 4 items (~₹280 estimated loss)Budget Status: ₹800 remaining (if budget set) OR "Set a budget" prompt
+
+Section B — Spend by CategoryHorizontal bar chart:
+
+Dairy: ₹1,200 ████████Vegetables: ₹900 ██████Fruits: ₹600 ████Dry Goods: ₹1,100 ███████Others: ₹400 ███
+
+Below chart: same data as a table for users who prefer numbers over visuals.
+
+Section C — Month vs Last Month ComparisonSimple two-column comparison:CategoryLast MonthThis MonthChangeDairy₹1,000₹1,200🔺 +₹200Vegetables₹1,100₹900🔽 –₹200Text summary below: "You spent ₹200 more on Dairy this month. Vegetable spend is down — good job!"
+
+Section D — Waste TrackerList of items that expired:
+
+Spinach — expired Jun 2 — estimated loss ₹40Bread — expired Jun 1 — estimated loss ₹35
+
+Total waste this month: ₹280Logic: Loss estimate = pricePerUnit × remaining quantity at time of expiry. If price not set → shows "Price not recorded."
+
+Section E — Budget ControlIf budget is set:
+
+Progress bar: ₹3,400 of ₹4,000 budget used (85%)Warning state at 80%+: bar turns orangeExceeded state: bar turns red + banner alert
+
+If budget not set:
+
+Prompt card: "Set a monthly grocery budget to track your limits" → input field inline
+
+Page 8 — Settings PageSections as collapsible cards or tab groups:
+
+Profile
+
+Edit Name, Email, MobileChange PasswordFamily size (affects threshold defaults)Language toggle
+
+Vendors
+
+Full list of saved vendorsEach row: Vendor icon | Name | WhatsApp Number | Edit | Delete
+
+Add New Vendor buttonSame UI as signup step 2
+
+Notification PreferencesToggle switches for:
+
+Daily morning summary (time picker — default 8:00 AM)Expiry alerts (1 day before / 2 days before — radio)Low stock alertsReorder remindersWeekly spending summary
+
+Thresholds
+
+List of all items with thresholds setInline editable — click value to edit, Enter to saveReset to defaults button (recalculates from family size)
+
+Data & Privacy
+
+Export all data (CSV)Export spending history (PDF)Delete Account (with confirmation — double confirm via email OTP)
+
+Global UI Behaviors (Applies Everywhere)Toast Notifications (small pop-ups bottom right):
+
+Success: green — "Item added successfully"Warning: yellow — "Milk is nearing threshold"Error: red — "Failed to send WhatsApp message"Auto-dismiss after 4 seconds
+
+Loading States:
+
+Skeleton screens (grey placeholder boxes) while data loads — never a blank white pageButtons show a spinner when an action is in progress — cannot be double-clicked
+
+Empty States:
+
+Every list/grid that can be empty has a friendly illustration + messageE.g., Fridge empty → "Your fridge is empty. Add your first item!" with a + button
+
+Mobile Behavior:
+
+Sidebar collapses to a bottom tab bar on mobileDrawers become full-screen sheetsAll tap targets minimum 44px height

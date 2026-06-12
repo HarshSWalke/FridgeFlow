@@ -1,0 +1,27 @@
+## Running FridgeFlow on a New Device
+
+1. **Install Node.js** (includes npm)
+   - Download from https://nodejs.org and install the LTS version.
+
+2. **Open a terminal** and navigate to the project folder:
+   ```bash
+   cd "C:/Users/harsh/OneDrive/Desktop/FridgeFLow"
+   ```
+
+3. **Install dependencies**:
+   ```bash
+   npm install
+   ```
+   This reads the `package.json` and installs all required packages.
+
+4. **Start the development server**:
+   ```bash
+   npm run dev
+   ```
+   Vite will compile the React app and output a local URL, usually `http://localhost:5173`.
+
+5. **Open the app**
+   - Open your web browser and go to the URL shown in the terminal (e.g., `http://localhost:5173`).
+   - You should see the FridgeFlow application ready to use.
+
+**Optional:** To create a production build, run `npm run build` and then serve the `dist` folder with any static file server.

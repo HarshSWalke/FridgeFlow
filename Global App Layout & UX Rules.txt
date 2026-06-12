@@ -1,0 +1,130 @@
+Global App Layout & UX Rules
+Desktop Layout: Fixed Left Sidebar (250px) + Scrollable Main Content (flex-1).
+
+Mobile Layout: Bottom Tab Navigation (fixed bottom-0) + Header (fixed top-0) + Scrollable Body.
+
+State Management: React Context or Redux for User, FridgeItems, and Alerts.
+
+UX Patterns: * Use Slide-over Drawers (Right side) for forms (avoids page navigations).
+
+Use Skeleton Loaders for data fetching.
+
+Use Toast Notifications (fixed bottom-4 right-4) for success/error alerts.
+
+Minimum touch targets: 44px height on mobile.
+
+Page 1: Landing Page (Public)Purpose: Conversion, Marketing.
+
+Header: sticky top-0 z-50. Flexbox (justify-between). Logo left, Nav links center, CTA ("Get Started Free") right.
+
+Hero Section: min-h-[80vh] flex flex-col justify-center items-center. Centered large typography (H1), primary CTA button, virtual fridge illustration background (bg-cover bg-center).
+
+How It Works: grid grid-cols-1 md gap-8. 3 columns. Each: Icon (top), H3, brief .
+
+Features: grid grid-cols-2 md gap-6. 6 Card components with hover states (hover transition-all).
+
+Footer: Standard multi-column flex layout.
+
+Page 2: Signup (Onboarding Flow)Purpose: Frictionless data collection.
+
+Layout: Single-page app (SPA) approach using state (step = 1, 2, 3). Centered White Card (max-w-md mx-auto shadow-md rounded-xl).
+
+Step 1 (Basic Info): Standard form stack (flex-col gap-4). Password input with eye icon (absolute right-3). Next button.
+
+Step 2 (Vendors): * Dynamic List: map through pre-built vendors.
+
+Layout: Inline Flex row per vendor (Icon + Name + Input + Delete Button).
+
+Action: "Add Custom Vendor" adds a new row to state.
+
+Step 3 (Thresholds): * Grid of mini-cards or dense list.
+
+Controls: Number stepper (- input +) for quantity, Toggle Switch for Include/Skip.
+
+Action: Primary "Finish Setup" button.
+
+Page 3: LoginPurpose: Quick access.
+
+Layout: Centered Card (h-screen flex items-center justify-center bg-gray-50).
+
+Structure: Logo top, Email/Password inputs (flex-col gap-4), "Log In" (Primary, full width), "Forgot Password" (Text link, right-aligned). Inline validation text (text-red-500 text-sm) directly below failed inputs.
+
+Page 4: Dashboard (Main Hub)Purpose: At-a-glance status and immediate actions.
+
+Section A (Stats): grid grid-cols-2 lg gap-4. 4 Data Cards. Highlight urgent numbers in semantic colors (Yellow/Orange).
+
+Section B (Alerts): * Accordion or List Card.
+
+List Items: flex justify-between items-center. Text left, Action Buttons (pill-shaped, small) right.
+
+Empty State: Green card with checkmark icon.
+
+Section C (Fridge Mini): * Tabs Component: Horizontal scroll (overflow-x-auto whitespace-nowrap).
+
+Content: Top 5 items list. Badges (w-3 h-3 rounded-full) next to item names for freshness.
+
+Section D (Activity): Vertical timeline UI. border-l-2 border-gray-200 pl-4. Small grey text for timestamps.
+
+Page 5: My FridgePurpose: Core inventory management.
+
+Top Bar: flex justify-between. Search Input (left/center) + Primary "+ Add Item" Button (right).
+
+Tabs: Horizontal sticky filter bar below header (All | Dairy | Veg...).
+
+Item Grid: grid grid-cols-1 sm lg gap-6.
+
+Item Card UI:
+
+Container: relative p-4 border rounded-lg bg-white.
+
+Top-Right: Absolute positioned color dot (🟢🟡🔴).
+
+Body: Bold Title, Quantity/Unit (text-2xl font-semibold), Expiry text (gray/red depending on date).
+
+Footer: flex justify-between mt-4. Mark Finished (Primary-outline), Edit (Icon), 3-dot menu (Dropdown).
+
+Add/Edit Drawer (Crucial):
+
+UX: Slides in from the right (fixed top-0 right-0 h-full w-96 shadow-2xl transition-transform).
+
+Form: Autocomplete input for Name. Number steppers for Quantity. Date Picker for Expiry. Sticky bottom bar with "Save" button.
+
+Page 6: ReorderPurpose: Action-oriented WhatsApp list builder.
+
+Tabs: Pending | History.
+
+Pending View:
+
+Layout: Grouped by Vendor. Each Vendor is a Card.
+
+Vendor Header: Vendor Name + WhatsApp icon + "Send Order" button (Right aligned).
+
+Items inside Vendor Card: flex justify-between border-b last. Item Name vs. Number Stepper.
+
+Send Preview Modal: Slide-up Bottom Sheet (fixed bottom-0 w-full rounded-t-2xl). Contains a  with the pre-populated WhatsApp message, "Send via WhatsApp" button, and "Copy Text" secondary button.
+
+History View: Accordion list. Click to expand and view items. "Reorder Same Items" button inside expansion.
+
+Page 7: Notebook (Spending Tracker)Purpose: Data visualization and insights.
+
+Top Bar: Month Navigator (flex items-center space-x-4) + Export PDF button (icon right).
+
+Summary Cards: grid-cols-2 md.
+
+Chart Section: Use Recharts or Chart.js. Horizontal Bar Chart component.
+
+Comparison Section: Simple HTML . Use Green/Red text arrows (🔺🔽) for quick visual cues on spend changes.
+
+Budget Bar: Linear Progress Bar component (w-full h-2 rounded). Map colors dynamically: < 80% = green/blue, 80-99% = orange, 100%+ = red.
+
+Page 8: SettingsPurpose: Configuration.
+
+Layout: Two-column desktop (Left: vertical tab menu, Right: Form content), single column mobile.
+
+Components: * Forms for Profile.
+
+Inline-editable table/list for Thresholds (click number text -> transforms to ).
+
+Toggle Switches (w-11 h-6 bg-gray-200 rounded-full cursor-pointer) for Notification preferences.
+
+Danger Zone: Red-outlined "Delete Account" button triggering a double-confirm modal.

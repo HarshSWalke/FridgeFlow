@@ -8,8 +8,8 @@ const Login = () => {
   const { login, showToast } = useContext(AppContext);
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('priya@example.com'); // Prefilled for easy local testing
-  const [password, setPassword] = useState('password123'); // Prefilled for easy local testing
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [errors, setErrors] = useState({});
 

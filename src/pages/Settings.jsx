@@ -185,8 +185,8 @@ export default function Settings() {
         {activeTab === 'Data' && (
           <div className="tab-panel data-tab">
             <h2>Data Management</h2>
-            <button className="primary-btn" onClick={() => alert('CSV Export mock')}>Export CSV</button>
-            <button className="primary-btn" onClick={() => alert('PDF Export mock')}>Export PDF</button>
+            <button className="primary-btn" onClick={() => alert('CSV export is not available yet')}>Export CSV</button>
+            <button className="primary-btn" onClick={() => alert('PDF export is not available yet')}>Export PDF</button>
             <hr />
             <button className="danger-btn" onClick={confirmAndDelete}>Delete Account</button>
           </div>

@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Plus, Trash2, ArrowLeft, ArrowRight, Check } from 'lucide-react';
 import { AppContext } from '../context/AppContext';
@@ -18,18 +18,13 @@ const Signup = () => {
     mobile: '',
     email: '',
     password: '',
-    familySize: '3',
-    language: 'English'
+    familySize: '',
+    language: ''
   });
   const [errors, setErrors] = useState({});
 
   // Step 2 State (Vendors)
-  const [vendors, setVendors] = useState([
-    { name: 'Milkman Ramesh', contact: '9876543210', category: 'Dairy', emoji: '🥛' },
-    { name: 'Suresh Vegetables', contact: '9123456789', category: 'Vegetables', emoji: '🥦' },
-    { name: 'Rajesh Fruits', contact: '9812345678', category: 'Fruits', emoji: '🍎' },
-    { name: 'Kirana General Store', contact: '9000000009', category: 'General', emoji: '🛒' }
-  ]);
+  const [vendors, setVendors] = useState([]);
   const [showAddVendor, setShowAddVendor] = useState(false);
   const [newVendor, setNewVendor] = useState({ name: '', emoji: '🥛', contact: '' });
 
@@ -37,30 +32,6 @@ const Signup = () => {
   const [thresholdItems, setThresholdItems] = useState([]);
   const [showAddItem, setShowAddItem] = useState(false);
   const [newItem, setNewItem] = useState({ name: '', category: 'Dairy', threshold: 1.0, unit: 'kg' });
-
-  // Load Thresholds when Step 1 is done
-  useEffect(() => {
-    if (step === 3 && thresholdItems.length === 0) {
-      const fs = formData.familySize;
-      const mult = fs === '1' ? 0.5 : fs === '2' ? 1.0 : fs === '3' || fs === '4' ? 1.5 : 2.5;
-      
-      const defaults = [
-        { name: 'Milk', category: 'Dairy', threshold: Math.max(0.5, 1.0 * mult), unit: 'L', included: true },
-        { name: 'Curd', category: 'Dairy', threshold: Math.ceil(200 * mult), unit: 'g', included: true },
-        { name: 'Paneer', category: 'Dairy', threshold: Math.ceil(100 * mult), unit: 'g', included: true },
-        { name: 'Onion', category: 'Vegetables', threshold: Math.max(0.5, 1.0 * mult), unit: 'kg', included: true },
-        { name: 'Tomato', category: 'Vegetables', threshold: Math.max(0.5, 1.0 * mult), unit: 'kg', included: true },
-        { name: 'Potato', category: 'Vegetables', threshold: Math.max(0.5, 1.0 * mult), unit: 'kg', included: true },
-        { name: 'Rice', category: 'Dry Goods', threshold: Math.max(1.0, 2.0 * mult), unit: 'kg', included: true },
-        { name: 'Dal', category: 'Dry Goods', threshold: Math.max(0.5, 1.0 * mult), unit: 'kg', included: true },
-        { name: 'Bread', category: 'Snacks', threshold: 1, unit: 'packets', included: true },
-        { name: 'Eggs', category: 'Dairy', threshold: Math.ceil(4 * mult), unit: 'pcs', included: true },
-        { name: 'Sugar', category: 'Dry Goods', threshold: Math.max(0.5, 1.0 * mult), unit: 'kg', included: true },
-        { name: 'Oil', category: 'Dry Goods', threshold: Math.max(1.0, 1.0 * mult), unit: 'L', included: true }
-      ];
-      setThresholdItems(defaults);
-    }
-  }, [step, formData.familySize, thresholdItems.length]);
 
   // Step 1 Validation
   const validateStep1 = () => {
@@ -84,6 +55,14 @@ const Signup = () => {
       newErrors.password = 'Password must be at least 8 characters long';
     } else if (!/\d/.test(formData.password)) {
       newErrors.password = 'Password must contain at least one number';
+    }
+
+    if (!formData.familySize) {
+      newErrors.familySize = 'Family size is required';
+    }
+
+    if (!formData.language) {
+      newErrors.language = 'Language preference is required';
     }
 
     setErrors(newErrors);
@@ -163,22 +142,6 @@ const Signup = () => {
   };
 
   const handleFinish = () => {
-    // Collect active items and format them
-    const activeItems = thresholdItems
-      .filter(item => item.included)
-      .map((item, idx) => ({
-        id: `signup-item-${idx}`,
-        name: item.name,
-        category: item.category,
-        quantity: item.threshold * 2, // Prefill double threshold as current qty
-        unit: item.unit,
-        threshold: item.threshold,
-        dateAdded: '2026-06-03',
-        expiryDate: item.category === 'Dairy' ? '2026-06-08' : item.category === 'Vegetables' ? '2026-06-07' : null,
-        pricePerUnit: item.category === 'Dairy' ? 60 : 40,
-        addedBy: formData.name
-      }));
-
     signup({
       name: formData.name,
       email: formData.email,
@@ -186,8 +149,9 @@ const Signup = () => {
       mobile: formData.mobile,
       familySize: formData.familySize,
       language: formData.language,
+      budget: 0,
       vendors: vendors,
-      items: activeItems
+      items: []
     });
     
     navigate('/dashboard');
@@ -233,7 +197,7 @@ const Signup = () => {
               <input 
                 id="fullName"
                 type="text" 
-                placeholder="Priya Sharma"
+                placeholder="Full name"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -255,7 +219,7 @@ const Signup = () => {
                 <input 
                   id="mobile"
                   type="tel" 
-                  placeholder="98765 43210"
+                  placeholder="10-digit mobile number"
                   value={formData.mobile}
                   onChange={(e) => setFormData({ ...formData, mobile: e.target.value.replace(/\D/g, '') })}
                 />
@@ -268,7 +232,7 @@ const Signup = () => {
               <input 
                 id="email"
                 type="email" 
-                placeholder="priya@example.com"
+                placeholder="name@example.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -303,12 +267,14 @@ const Signup = () => {
                 value={formData.familySize}
                 onChange={(e) => setFormData({ ...formData, familySize: e.target.value })}
               >
+                <option value="">Select family size</option>
                 <option value="1">1 Person</option>
                 <option value="2">2 People</option>
                 <option value="3">3 People</option>
                 <option value="4">4 People</option>
                 <option value="5">5+ People</option>
               </select>
+              {errors.familySize && <span className="error-text">{errors.familySize}</span>}
             </div>
 
             <div>
@@ -318,9 +284,11 @@ const Signup = () => {
                 value={formData.language}
                 onChange={(e) => setFormData({ ...formData, language: e.target.value })}
               >
+                <option value="">Select language</option>
                 <option value="English">English</option>
                 <option value="Hindi">Hindi (हिंदी)</option>
               </select>
+              {errors.language && <span className="error-text">{errors.language}</span>}
             </div>
 
             <div className="col-span-2 btn-group">
@@ -341,7 +309,7 @@ const Signup = () => {
         {step === 2 && (
           <div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              We'll use these contact numbers to format and send orders directly via WhatsApp. You can customize or skip these for now.
+              Add vendor contacts now or skip this step and add them later in Settings.
             </p>
 
             <div className="vendors-list">
@@ -382,7 +350,7 @@ const Signup = () => {
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input 
                     type="text" 
-                    placeholder="Vendor Name (e.g. Milkman)"
+                    placeholder="Vendor Name"
                     value={newVendor.name}
                     onChange={(e) => setNewVendor({ ...newVendor, name: e.target.value })}
                     style={{ flex: 1 }}
@@ -438,7 +406,7 @@ const Signup = () => {
         {step === 3 && (
           <div>
             <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary)', marginBottom: '1.5rem' }}>
-              Define alert points. Smart defaults are pre-filled below based on your family size of {formData.familySize}.
+              Add any item alert thresholds you want to save now, or finish setup with an empty fridge.
             </p>
 
             <div className="thresholds-list">
@@ -502,7 +470,7 @@ const Signup = () => {
                 <div className="custom-item-row">
                   <input 
                     type="text" 
-                    placeholder="Butter, Bread, etc."
+                    placeholder="Item name"
                     value={newItem.name}
                     onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
                   />

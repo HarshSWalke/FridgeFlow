@@ -52,10 +52,7 @@ const Reorder = () => {
 
   const autocompleteRef = useRef(null);
 
-  const suggestions = [
-    'Milk', 'Curd', 'Paneer', 'Butter', 'Onions', 'Tomatoes', 
-    'Potatoes', 'Bread', 'Eggs', 'Sugar', 'Rice', 'Dal'
-  ];
+  const suggestions = [];
 
   // Group pending orders by vendor
   const groupedOrders = pendingOrders.reduce((acc, item) => {
@@ -282,7 +279,7 @@ const Reorder = () => {
               <div style={{ position: 'relative' }}>
                 <input 
                   type="text" 
-                  placeholder="Milk, Tomatoes, Dal..." 
+                  placeholder="Item name" 
                   value={manualName}
                   onChange={(e) => {
                     setManualName(e.target.value);

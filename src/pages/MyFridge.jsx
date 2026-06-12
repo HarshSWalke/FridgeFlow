@@ -62,26 +62,8 @@ const MyFridge = () => {
 
   const categories = ['All', 'Dairy', 'Vegetables', 'Fruits', 'Dry Goods', 'Beverages', 'Snacks', 'Leftovers'];
 
-  const standardSuggestions = [
-    { name: 'Milk', category: 'Dairy', unit: 'L', threshold: 1.0 },
-    { name: 'Curd', category: 'Dairy', unit: 'g', threshold: 250 },
-    { name: 'Paneer', category: 'Dairy', unit: 'g', threshold: 200 },
-    { name: 'Amul Butter', category: 'Dairy', unit: 'g', threshold: 100 },
-    { name: 'Onions', category: 'Vegetables', unit: 'kg', threshold: 1.0 },
-    { name: 'Tomatoes', category: 'Vegetables', unit: 'kg', threshold: 0.5 },
-    { name: 'Potatoes', category: 'Vegetables', unit: 'kg', threshold: 1.0 },
-    { name: 'Basmati Rice', category: 'Dry Goods', unit: 'kg', threshold: 1.0 },
-    { name: 'Arhar Dal', category: 'Dry Goods', unit: 'kg', threshold: 0.5 },
-    { name: 'Eggs', category: 'Dairy', unit: 'pcs', threshold: 6 },
-    { name: 'Atta (Flour)', category: 'Dry Goods', unit: 'kg', threshold: 2.0 },
-    { name: 'White Bread', category: 'Snacks', unit: 'packets', threshold: 1 },
-    { name: 'Sunflower Oil', category: 'Dry Goods', unit: 'L', threshold: 1.0 },
-    { name: 'Apples', category: 'Fruits', unit: 'kg', threshold: 0.5 },
-    { name: 'Bananas', category: 'Fruits', unit: 'pcs', threshold: 6 }
-  ];
-
-  // Helper date for simulated local time: June 3, 2026
-  const today = new Date('2026-06-03');
+  const standardSuggestions = [];
+  const today = new Date();
 
   // Close menus and popups when clicking outside
   useEffect(() => {
@@ -542,7 +524,7 @@ const MyFridge = () => {
                 <label>Item Name *</label>
                 <input 
                   type="text" 
-                  placeholder="e.g. Tomatoes" 
+                  placeholder="Item name" 
                   value={itemName}
                   onChange={(e) => {
                     setItemName(e.target.value);
@@ -655,7 +637,7 @@ const MyFridge = () => {
                   <label>Price Per Unit (₹)</label>
                   <input 
                     type="number" 
-                    placeholder="e.g. 60"
+                    placeholder="Price"
                     value={itemPrice}
                     onChange={(e) => setItemPrice(e.target.value)}
                   />

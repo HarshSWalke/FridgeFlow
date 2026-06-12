@@ -310,7 +310,7 @@ const Notebook = () => {
   );
 };
 
-// Quick mock for CheckCircle icon
+// Local CheckCircle icon
 const CheckCircle = ({ size, style }) => (
   <svg style={style} width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>

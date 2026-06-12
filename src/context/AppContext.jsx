@@ -13,6 +13,9 @@ import {
 
 export const AppContext = createContext();
 
+const visibleActivityLog = (logs = []) =>
+  logs.filter((log) => !['user_signup', 'user_login', 'user_logout'].includes(log.action));
+
 export const AppProvider = ({ children }) => {
   const today = new Date();
 
@@ -21,13 +24,13 @@ export const AppProvider = ({ children }) => {
   const [fridgeItems, setFridgeItems] = useState([]);
   const [activityLog, setActivityLog] = useState([]);
   const [orderHistory, setOrderHistory] = useState([]);
-  const [budget, setBudgetState] = useState(4000);
+  const [budget, setBudgetState] = useState(0);
   const [notificationPrefs, setNotificationPrefs] = useState({
-    dailySummary: true,
-    summaryTime: '08:00',
-    expiryAlerts: '1',
-    lowStockAlerts: true,
-    reorderReminders: true,
+    dailySummary: false,
+    summaryTime: '',
+    expiryAlerts: '',
+    lowStockAlerts: false,
+    reorderReminders: false,
     weeklySummary: false,
   });
   const [pendingOrders, setPendingOrders] = useState([]);
@@ -66,7 +69,7 @@ export const AppProvider = ({ children }) => {
 
   const refreshDashboard = useCallback(async () => {
     const { data } = await dashboardApi.get();
-    if (data?.activityLog) setActivityLog(data.activityLog);
+    if (data?.activityLog) setActivityLog(visibleActivityLog(data.activityLog));
     if (data?.stats) setDashboardStats(data.stats);
     return data;
   }, []);
@@ -85,7 +88,7 @@ export const AppProvider = ({ children }) => {
       const { data: userData } = await authApi.me();
       setUser(userData);
       setVendors(userData.vendors || []);
-      setBudgetState(userData.budget ?? 4000);
+      setBudgetState(userData.budget ?? 0);
       setNotificationPrefs(userData.notificationPrefs || notificationPrefs);
 
       await Promise.all([
@@ -464,7 +467,7 @@ export const AppProvider = ({ children }) => {
       setActivityLog([]);
       setOrderHistory([]);
       setPendingOrders([]);
-      setBudgetState(4000);
+      setBudgetState(0);
       showToast('Account deleted successfully', 'error');
     } catch (err) {
       showToast(err.message || 'Failed to delete account', 'error');
@@ -477,7 +480,7 @@ export const AppProvider = ({ children }) => {
       setToken(data.token);
       setUser(data.user);
       setVendors(data.user.vendors || []);
-      setBudgetState(data.user.budget ?? 4000);
+      setBudgetState(data.user.budget ?? 0);
       setNotificationPrefs(data.user.notificationPrefs || notificationPrefs);
 
       await Promise.all([
@@ -506,13 +509,14 @@ export const AppProvider = ({ children }) => {
         familySize: signupData.familySize,
         language: signupData.language,
         vendors: signupData.vendors,
-        items: signupData.items,
+        items: [],
+        budget: signupData.budget,
       });
 
       setToken(data.token);
       setUser(data.user);
       setVendors(data.user.vendors || []);
-      setBudgetState(data.user.budget ?? 4000);
+      setBudgetState(data.user.budget ?? 0);
 
       await Promise.all([
         refreshItems(),

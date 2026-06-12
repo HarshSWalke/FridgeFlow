@@ -41,19 +41,22 @@ const Dashboard = () => {
   const lowStockCount = dashboardStats?.lowStock ?? alerts.filter(a => a.type === 'low-stock').length;
   
   const itemsSpend = fridgeItems.reduce((acc, item) => acc + ((item.pricePerUnit || 0) * item.quantity), 0);
-  const totalSpend = dashboardStats?.monthlySpend ?? Math.max(1200, Math.round(itemsSpend + 1200));
+  const totalSpend = dashboardStats?.monthlySpend ?? Math.round(itemsSpend);
 
   const categories = ['Dairy', 'Vegetables', 'Fruits', 'Dry Goods', 'Snacks'];
 
+  const normalizeCategory = (value) => value?.toString().trim().toLowerCase();
+
   const getFilteredItems = (category) => {
+    const normalizedCategory = normalizeCategory(category);
     return fridgeItems
-      .filter(item => item.category === category && item.quantity > 0)
+      .filter((item) => item.quantity > 0 && normalizeCategory(item.category) === normalizedCategory)
       .slice(0, 5); // top 5
   };
 
   const getItemFreshnessColor = (item) => {
     if (!item.expiryDate) return 'fresh';
-    const today = new Date('2026-06-03');
+    const today = new Date();
     const expDate = new Date(item.expiryDate);
     const diffTime = expDate - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));

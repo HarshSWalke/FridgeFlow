@@ -114,21 +114,21 @@ const Landing = () => {
           
           {/* Shelf 1 */}
           <div className="fridge-shelf">
-            <span className="mock-item mock-milk"></span>
-            <span className="mock-item mock-milk" style={{ opacity: 0.5 }}></span>
-            <span className="mock-item mock-jar"></span>
+            <span className="preview-item preview-tall"></span>
+            <span className="preview-item preview-tall" style={{ opacity: 0.5 }}></span>
+            <span className="preview-item preview-jar"></span>
           </div>
           {/* Shelf 2 */}
           <div className="fridge-shelf">
-            <span className="mock-item mock-veg"></span>
-            <span className="mock-item mock-veg" style={{ backgroundColor: '#10b981' }}></span>
-            <span className="mock-item mock-fruit"></span>
-            <span className="mock-item mock-fruit" style={{ backgroundColor: '#f59e0b' }}></span>
+            <span className="preview-item preview-round"></span>
+            <span className="preview-item preview-round" style={{ backgroundColor: '#10b981' }}></span>
+            <span className="preview-item preview-dot"></span>
+            <span className="preview-item preview-dot" style={{ backgroundColor: '#f59e0b' }}></span>
           </div>
           {/* Shelf 3 */}
           <div className="fridge-shelf">
-            <span className="mock-item mock-jar" style={{ backgroundColor: '#8b5cf6', height: '28px' }}></span>
-            <span className="mock-item mock-veg" style={{ width: '22px', height: '22px' }}></span>
+            <span className="preview-item preview-jar" style={{ backgroundColor: '#8b5cf6', height: '28px' }}></span>
+            <span className="preview-item preview-round" style={{ width: '22px', height: '22px' }}></span>
           </div>
         </div>
       </section>

@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { AppContext } from '../context/AppContext';
 import EmptyState from '../components/Common/EmptyState';
+import { openFoodFactsApi } from '../services/api';
 import './MyFridge.css';
 
 const MyFridge = () => {
@@ -53,6 +54,8 @@ const MyFridge = () => {
   // Autocomplete Suggestions
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [filteredSuggestions, setFilteredSuggestions] = useState([]);
+  const [isProductSearchLoading, setIsProductSearchLoading] = useState(false);
+  const [productSearchError, setProductSearchError] = useState('');
   
   // Duplicate detection override state
   const [duplicateWarning, setDuplicateWarning] = useState(null);
@@ -82,12 +85,24 @@ const MyFridge = () => {
   // Filter autocomplete list as name changes
   useEffect(() => {
     if (itemName.trim().length > 0) {
-      const filtered = standardSuggestions.filter(item => 
-        item.name.toLowerCase().includes(itemName.toLowerCase())
-      );
-      setFilteredSuggestions(filtered);
+      const searchQuery = itemName.trim();
+      setIsProductSearchLoading(true);
+      setProductSearchError('');
+
+      openFoodFactsApi.search(searchQuery)
+        .then((result) => {
+          setFilteredSuggestions(result || []);
+        })
+        .catch((err) => {
+          setProductSearchError(err.message || 'Failed to fetch product suggestions');
+          setFilteredSuggestions([]);
+        })
+        .finally(() => {
+          setIsProductSearchLoading(false);
+        });
     } else {
       setFilteredSuggestions([]);
+      setProductSearchError('');
     }
   }, [itemName]);
 
@@ -180,9 +195,10 @@ const MyFridge = () => {
   // Handle Autocomplete suggestion click
   const handleSuggestionClick = (suggestion) => {
     setItemName(suggestion.name);
-    setItemCategory(suggestion.category);
-    setItemUnit(suggestion.unit);
-    setItemThreshold(suggestion.threshold);
+    setItemCategory(suggestion.category || 'Other');
+    setItemUnit(suggestion.unit || 'pcs');
+    setItemPrice('');
+    setItemQty(suggestion.quantity || 1);
     setShowSuggestions(false);
   };
 
@@ -534,17 +550,25 @@ const MyFridge = () => {
                   onFocus={() => setShowSuggestions(true)}
                 />
                 
-                {showSuggestions && filteredSuggestions.length > 0 && (
+                {showSuggestions && (
                   <div className="autocomplete-suggestions">
-                    {filteredSuggestions.map((suggestion, idx) => (
-                      <div 
-                        key={idx}
-                        className="autocomplete-suggestion"
-                        onClick={() => handleSuggestionClick(suggestion)}
-                      >
-                        {suggestion.name} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({suggestion.category})</span>
-                      </div>
-                    ))}
+                    {isProductSearchLoading ? (
+                      <div className="autocomplete-suggestion">Loading suggestions...</div>
+                    ) : productSearchError ? (
+                      <div className="autocomplete-suggestion">{productSearchError}</div>
+                    ) : filteredSuggestions.length > 0 ? (
+                      filteredSuggestions.map((suggestion, idx) => (
+                        <div 
+                          key={idx}
+                          className="autocomplete-suggestion"
+                          onClick={() => handleSuggestionClick(suggestion)}
+                        >
+                          {suggestion.name} <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>({suggestion.category})</span>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="autocomplete-suggestion">No product suggestions. Continue manual entry.</div>
+                    )}
                   </div>
                 )}
               </div>

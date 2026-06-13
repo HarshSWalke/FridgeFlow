@@ -13,6 +13,8 @@ import transactionRoutes from './routes/transactions.js';
 import dashboardRoutes from './routes/dashboard.js';
 import userRoutes from './routes/users.js';
 import recurringRoutes from './routes/recurring.js';
+import openFoodFactsRoutes from './routes/openFoodFacts.js';
+import exchangeRateRoutes from './routes/exchangeRateRoutes.js';
 
 // Load models so Mongoose registers schemas and creates indexes
 import './models/index.js';
@@ -70,6 +72,8 @@ app.use('/api/transactions', transactionRoutes);
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/recurring', recurringRoutes);
+app.use('/api/openfoodfacts', openFoodFactsRoutes);
+app.use('/api/exchange-rate', exchangeRateRoutes);
 
 // Root route
 app.get('/', (req, res) => {

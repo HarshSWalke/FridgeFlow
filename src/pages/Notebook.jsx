@@ -9,6 +9,7 @@ import {
   TrendingDown,
   DollarSign
 } from 'lucide-react';
+import { exchangeRateApi } from '../services/api';
 import { AppContext } from '../context/AppContext';
 import EmptyState from '../components/Common/EmptyState';
 import './Notebook.css';
@@ -17,6 +18,10 @@ const Notebook = () => {
   const { fridgeItems, budget, showToast, notebookSummary, refreshNotebookSummary } = useContext(AppContext);
   const [currentMonthIndex, setCurrentMonthIndex] = useState(1); // 0: May, 1: June, 2: July
   const [monthData, setMonthData] = useState(null);
+  const [currency, setCurrency] = useState('INR');
+  const [exchangeRate, setExchangeRate] = useState(null);
+  const [exchangeLoading, setExchangeLoading] = useState(false);
+  const [exchangeError, setExchangeError] = useState('');
 
   const months = ['May 2026', 'June 2026', 'July 2026'];
   const monthMap = [
@@ -30,6 +35,30 @@ const Notebook = () => {
     const { month, year } = monthMap[currentMonthIndex];
     refreshNotebookSummary(month, year).then((data) => setMonthData(data));
   }, [currentMonthIndex, refreshNotebookSummary]);
+
+  useEffect(() => {
+    const loadExchangeRate = async () => {
+      if (currency === 'INR') {
+        setExchangeRate(1);
+        setExchangeError('');
+        return;
+      }
+
+      setExchangeLoading(true);
+      setExchangeError('');
+      try {
+        const response = await exchangeRateApi.convert('INR', currency, 1);
+        setExchangeRate(response.rate);
+      } catch (err) {
+        setExchangeError(err.message || 'Unable to load exchange rate');
+        setExchangeRate(null);
+      } finally {
+        setExchangeLoading(false);
+      }
+    };
+
+    loadExchangeRate();
+  }, [currency]);
 
   const wastedItems = fridgeItems.filter(
     (item) => item.expiryDate && new Date(item.expiryDate) < today && item.quantity > 0
@@ -81,6 +110,18 @@ const Notebook = () => {
   const data = activeData();
   const budgetRatio = budget > 0 ? data.totalSpent / budget : 0;
   const budgetPercentage = Math.round(budgetRatio * 100);
+  const targetSymbol = currency === 'INR' ? '₹' : currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : currency === 'AED' ? 'د.إ' : currency;
+  const formattedCurrency = (value) => `${targetSymbol}${Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  const convertedTotalSpent = exchangeRate ? data.totalSpent * exchangeRate : data.totalSpent;
+  const convertedWasteCost = exchangeRate ? data.wasteCost * exchangeRate : data.wasteCost;
+  const convertedBudgetRemaining = exchangeRate ? (budget - data.totalSpent) * exchangeRate : budget - data.totalSpent;
+  const exchangeDescription = currency === 'INR'
+    ? 'Showing INR values.'
+    : exchangeLoading
+      ? 'Loading currency conversion...'
+      : exchangeError
+        ? exchangeError
+        : `1 INR = ${targetSymbol}${exchangeRate || 0} ${currency}`;
 
   const prevMonthSpends = {
     Dairy: Math.round((data.prevTotal || 0) * 0.26),
@@ -128,9 +169,23 @@ const Notebook = () => {
             </button>
           </div>
 
-          <button className="btn btn-outline btn-sm flex-center" onClick={handleExportPDF} style={{ minHeight: '40px' }}>
-            <Download size={16} /> Export PDF
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+            <select
+              className="filter-select"
+              value={currency}
+              onChange={(e) => setCurrency(e.target.value)}
+              style={{ minWidth: '140px', height: '40px' }}
+            >
+              <option value="INR">INR (₹)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+              <option value="GBP">GBP (£)</option>
+              <option value="AED">AED (د.إ)</option>
+            </select>
+            <button className="btn btn-outline btn-sm flex-center" onClick={handleExportPDF} style={{ minHeight: '40px' }}>
+              <Download size={16} /> Export PDF
+            </button>
+          </div>
         </div>
       </div>
 
@@ -138,7 +193,12 @@ const Notebook = () => {
       <div className="notebook-summary-grid">
         <div className="card stat-card spend">
           <span className="stat-label">Total Spent</span>
-          <span className="stat-value">₹{data.totalSpent.toLocaleString('en-IN')}</span>
+          <span className="stat-value">{formattedCurrency(convertedTotalSpent)}</span>
+          {currency !== 'INR' && (
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              ₹{data.totalSpent.toLocaleString('en-IN')} base
+            </span>
+          )}
         </div>
         <div className="card stat-card spend" style={{ borderColor: 'var(--primary)' }}>
           <span className="stat-label">Groceries Bought</span>
@@ -146,16 +206,32 @@ const Notebook = () => {
         </div>
         <div className="card stat-card expired">
           <span className="stat-label">Wasted Costs</span>
-          <span className="stat-value">₹{data.wasteCost.toLocaleString('en-IN')}</span>
+          <span className="stat-value">{formattedCurrency(convertedWasteCost)}</span>
+          {currency !== 'INR' && (
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+              ₹{data.wasteCost.toLocaleString('en-IN')} base
+            </span>
+          )}
           <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>({data.wasteCount} expired items)</span>
         </div>
         <div className="card stat-card" style={{ borderColor: budgetRatio >= 1 ? 'var(--expired)' : 'var(--border-color)' }}>
           <span className="stat-label">Budget Remaining</span>
           <span className="stat-value" style={{ color: budgetRatio >= 1 ? 'var(--expired)' : 'var(--fresh)' }}>
-            {budgetRatio >= 1 ? 'Exceeded' : `₹${(budget - data.totalSpent).toLocaleString('en-IN')}`}
+            {budgetRatio >= 1 ? 'Exceeded' : formattedCurrency(convertedBudgetRemaining)}
           </span>
-          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Limit: ₹{budget}</span>
+          <span style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Limit: {formattedCurrency(budget)}</span>
         </div>
+      </div>
+
+      <div style={{ marginTop: '1rem', marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', flexWrap: 'wrap' }}>
+        <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+          {exchangeDescription}
+        </div>
+        {currency !== 'INR' && !exchangeLoading && !exchangeError && (
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
+            Converted values use the latest rate from the exchange API.
+          </div>
+        )}
       </div>
 
       {/* Budget Control Track Slider */}

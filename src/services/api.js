@@ -74,6 +74,24 @@ export const dashboardApi = {
   get: () => apiRequest('/dashboard'),
 };
 
+export const openFoodFactsApi = {
+  search: async (query) => {
+    const result = await apiRequest(`/openfoodfacts/search?q=${encodeURIComponent(query)}`);
+    return result.data;
+  },
+  lookupBarcode: async (code) => {
+    const result = await apiRequest(`/openfoodfacts/barcode/${encodeURIComponent(code)}`);
+    return result.data;
+  },
+};
+
+export const exchangeRateApi = {
+  convert: async (base, target, amount = 1) => {
+    const result = await apiRequest(`/exchange-rate/convert?base=${encodeURIComponent(base)}&target=${encodeURIComponent(target)}&amount=${encodeURIComponent(amount)}`);
+    return result.data;
+  },
+};
+
 export const usersApi = {
   updateProfile: (body) => apiRequest('/users/profile', { method: 'PATCH', body: JSON.stringify(body) }),
   updateBudget: (budget) => apiRequest('/users/budget', { method: 'PATCH', body: JSON.stringify({ budget }) }),

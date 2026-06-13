@@ -12,7 +12,8 @@ import {
   Clock,
   PlusCircle,
   MinusCircle,
-  HelpCircle
+  HelpCircle,
+  X
 } from 'lucide-react';
 import { AppContext } from '../context/AppContext';
 import EmptyState from '../components/Common/EmptyState';
@@ -97,26 +98,54 @@ const Reorder = () => {
       return;
     }
 
+    if (!items || items.length === 0) {
+      showToast('Reorder list is empty. Add items before sending.', 'error');
+      return;
+    }
+
     setSendVendor(vendor);
     setSendItems(items);
 
-    // Format Whatsapp text
-    const listText = items.map(item => `• ${item.name}: ${item.quantity} ${item.unit}`).join('\n');
-    const greeting = `Hi ${vendor.name},\n\nPlease deliver the following groceries tomorrow:\n\n${listText}\n\nThank you!\n- ${user.name}`;
-    
+    const totalItems = items.reduce((acc, item) => acc + (item.quantity || 0), 0);
+    const listText = items.map(item => `${item.name} x ${item.quantity} ${item.unit}`).join('\n');
+    const greeting = `FridgeFlow Reorder Request\n\n${listText}\n\nTotal Items: ${totalItems}\n\nPlease confirm availability and delivery.\nThank you!`;
+
     setMessageText(greeting);
     setIsSheetOpen(true);
   };
 
   // Send WhatsApp Action
   const handleSendWhatsApp = () => {
-    if (!sendVendor) return;
+    if (!sendVendor) {
+      showToast('No vendor selected for WhatsApp order', 'error');
+      return;
+    }
 
-    // Open WA deep link
-    const waUrl = `https://wa.me/91${sendVendor.contact}?text=${encodeURIComponent(messageText)}`;
+    console.log('sendVendor', sendVendor);
+    console.log('messageText', messageText);
+
+    const rawNumber = (sendVendor.contact || '').toString().replace(/\D/g, '');
+    console.log('rawNumber', rawNumber);
+    if (!rawNumber) {
+      showToast('Vendor contact number is missing or invalid', 'error');
+      return;
+    }
+
+    let waNumber = rawNumber.startsWith('0') ? rawNumber.replace(/^0+/, '') : rawNumber;
+    if (waNumber.length === 10) {
+      waNumber = `91${waNumber}`;
+    }
+    console.log('waNumber', waNumber);
+
+    if (waNumber.length < 10) {
+      showToast('Vendor contact number is too short for WhatsApp', 'error');
+      return;
+    }
+
+    const waUrl = `https://wa.me/${waNumber}?text=${encodeURIComponent(messageText)}`;
+    console.log('waUrl', waUrl);
     window.open(waUrl, '_blank');
 
-    // Register history and clear items
     sendWhatsAppOrder(sendVendor.id, messageText, sendItems);
     setIsSheetOpen(false);
   };

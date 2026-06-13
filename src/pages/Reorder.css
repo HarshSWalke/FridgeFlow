@@ -150,7 +150,10 @@
 /* WhatsApp Message Preview Sheet */
 .sheet-overlay {
   position: fixed;
-  inset: 0;
+  top: 0;
+  bottom: 0;
+  left: 250px;
+  right: 0;
   background-color: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   z-index: 100;
@@ -160,8 +163,9 @@
 .sheet {
   position: fixed;
   bottom: 0;
-  left: 0;
+  left: 250px;
   right: 0;
+  width: calc(100% - 250px);
   background-color: var(--bg-card);
   border-top: 2px solid var(--primary);
   border-radius: var(--radius-xl) var(--radius-xl) 0 0;
@@ -171,6 +175,14 @@
   display: flex;
   flex-direction: column;
   animation: slideSheetUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (max-width: 768px) {
+  .sheet-overlay,
+  .sheet {
+    left: 0;
+    width: 100%;
+  }
 }
 
 @keyframes slideSheetUp {
